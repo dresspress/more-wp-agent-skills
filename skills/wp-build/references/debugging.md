@@ -1,0 +1,64 @@
+# Debugging
+
+Use this guide to troubleshoot common issues when developing with `@wordpress/build`.
+
+## 1. Blank Screen or 404 in Admin
+
+### Check PHP Callbacks
+Verify that the callback function in `add_menu_page` or `add_submenu_page` matches exactly what `@wordpress/build` generated.
+- Pattern: `{plugin_name}_{page_id}_render_page` (Fullscreen)
+- Pattern: `{plugin_name}_{page_id}_wp_admin_render_page` (WP-Admin)
+
+### Check Build Output
+Ensure `build/build.php` exists and that you have included it in your plugin.
+
+### Check Script Errors
+Open the browser console. If you see "Module not found" or "failed to load script module", it might be:
+- Missing `wpScript: true` in a package's `package.json`.
+- A dependency not being correctly externalized (check `wpPlugin.externalNamespaces`).
+- The build not being run after adding a new package.
+
+## 2. Wrong Layout (Sidebar issues)
+
+### Fullscreen mode shows WP Admin sidebar
+- You are likely using the wrong callback or slug. Ensure the slug DOES NOT have `-wp-admin` suffix if you want fullscreen.
+
+### WP-Admin mode hides sidebar or looks broken
+- You are likely using the Fullscreen callback (`_render_page`) instead of the WP-Admin callback (`_wp_admin_render_page`).
+
+## 3. Routes not rendering
+
+### "Route not found" message
+- Check if the route's `package.json` has the correct `path`.
+- Ensure the `page` field in route's `package.json` matches an entry in `wpPlugin.pages`.
+
+### Stage/Inspector not appearing
+- Ensure you use **named exports** in `stage.tsx` and `inspector.tsx`:
+  ```tsx
+  export const stage = () => ...; // CORRECT
+  export default () => ...;      // WRONG
+  ```
+- Check if the file names are exactly `stage.tsx` or `inspector.tsx`.
+
+## 4. Build Failures
+
+### Missing workspaces
+- Ensure root `package.json` has `"workspaces": ["packages/*"]`.
+
+### Syntax errors in SCSS
+- `@wordpress/build` is strict about SCSS. Check the terminal output for specific line numbers.
+
+### EMFILE: too many open files
+- Common on macOS when using `--watch`.
+- Fix: `ulimit -n 10240`
+
+## 5. Script Module Issues
+
+### Browser doesn't support import maps
+- `@wordpress/build` relies on Script Modules and Import Maps (WordPress 6.5+).
+- Ensure you are on a modern browser.
+- Ensure WordPress is up to date.
+
+### Dependency version mismatch
+- Check `.asset.php` files in `build/` to see what dependencies are being registered.
+- Ensure all `@wordpress/*` packages in your monorepo are using compatible versions.

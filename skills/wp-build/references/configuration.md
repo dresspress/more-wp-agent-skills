@@ -47,6 +47,34 @@ The root `package.json` contains plugin-wide settings in the `wpPlugin` block:
 | `externalNamespaces` | object | Map external plugin namespaces to globals | `{"@other": "other"}` |
 | `pages` | array | Admin pages supporting routes | See below |
 
+## Package package.json fields
+
+Each package in `packages/` can have these fields:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `wpScript` | boolean | If `true`, bundles as a script with global exposure. |
+| `wpScriptModuleExports` | object | Map of export paths to file paths for script modules. |
+| `wpScriptDefaultExport` | boolean | If `true`, wraps the default export. |
+| `wpScriptExtraDependencies` | array | Extra WordPress script handles to depend on. |
+| `wpStyleEntryPoints` | object/array | Custom SASS entry points. |
+| `wpCopyFiles` | array | Files to copy, with optional `transform: "php"`. |
+| `wpWorkers` | object | Web Worker entry points. |
+
+### Example: Advanced package config
+```json
+{
+  "wpScript": true,
+  "wpStyleEntryPoints": {
+    "editor": "src/editor.scss",
+    "view": "src/view.scss"
+  },
+  "wpCopyFiles": [
+    { "from": "src/meta.php", "to": "build/meta.php", "transform": "php" }
+  ]
+}
+```
+
 ## Pages configuration
 
 Pages can be strings or objects:

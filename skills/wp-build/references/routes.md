@@ -102,29 +102,39 @@ export const canvas = () => {
 
 ### route.tsx (optional)
 
-Lifecycle hooks for the route:
+Lifecycle hooks and visibility control for the route:
 
 ```tsx
 export const route = {
   // Runs before route loads (auth checks, redirects)
   beforeLoad: ({ params, search }) => {
-    if (!userHasPermission()) {
-      throw redirect('/unauthorized');
-    }
+    // ...
   },
 
   // Load data for the route
   loader: async ({ params, search }) => {
-    const data = await fetchData(params.id);
-    return { data };
+    // ...
+    return { data: '...' };
+  },
+
+  // Control inspector visibility (optional)
+  // Return boolean or Promise<boolean>
+  inspector: async ({ params, search }) => {
+    // Logic to show/hide the sidebar for this route
+    return true; 
   },
 
   // Control canvas rendering
   canvas: ({ params, search }) => {
-    // Return object: use default editor with postType/postId
-    // Return null: use custom canvas.tsx
+    // Return CanvasData object: use default editor with postType/postId
+    // Return null: use custom canvas.tsx component
     // Return undefined: no canvas
     return { postType: 'page', postId: params.id };
+  },
+
+  // Set the page title dynamically
+  title: ({ params, search }) => {
+    return 'Dynamic Title';
   }
 };
 ```
