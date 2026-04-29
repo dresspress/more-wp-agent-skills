@@ -99,6 +99,11 @@ add_action( 'my-app-page_init', function() {
 - `modules.php`: Script module registration.
 - `scripts.php`: Classic script registration.
 - `styles.php`: Style registration.
+- `routes.php`: Route registration helpers.
 - `pages.php`: Loader for all generated page files.
+- `modules/registry.php`: Script module metadata registry.
+- `scripts/registry.php`: Script metadata registry.
+- `styles/registry.php`: Style metadata registry.
+- `routes/registry.php`: Route metadata registry.
 - `pages/{id}/page.php`: Fullscreen mode logic for a specific page.
 - `pages/{id}/page-wp-admin.php`: WP-Admin mode logic for a specific page.

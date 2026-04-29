@@ -23,9 +23,7 @@ packages/
   "version": "1.0.0",
   "main": "src/index.js",
   "wpScript": true,
-  "wpScriptModuleExports": {
-    ".": "./build-module/index.mjs"
-  }
+  "wpScriptModuleExports": "./build-module/index.mjs"
 }
 ```
 
@@ -40,7 +38,6 @@ packages/
 ```
 
 When `true`:
-- Package is bundled as IIFE
 - Registered as WordPress script
 - Available at `window.{scriptGlobal}.{packageName}`
 - Handle: `{handlePrefix}-{packageName}`
@@ -50,6 +47,16 @@ When `false` or omitted:
 - Not exposed globally
 
 ### wpScriptModuleExports
+
+String shorthand for the root export:
+
+```json
+{
+  "wpScriptModuleExports": "./build-module/index.mjs"
+}
+```
+
+Object form for multiple export paths:
 
 ```json
 {
@@ -67,12 +74,27 @@ Defines ES module entry points. Keys are export paths, values are file paths.
 ```json
 {
   "wpWorkers": {
-    "my-worker": "./src/worker.js"
+    "./my-worker": "./src/worker.js"
   }
 }
 ```
 
 Defines Web Worker entry points as self-contained bundles.
+
+Object values can also be used when a worker needs module resolution redirects during bundling:
+
+```json
+{
+  "wpWorkers": {
+    "./my-worker": {
+      "entry": "./src/worker.js",
+      "resolve": {
+        "vips-es6.js": "vips.js"
+      }
+    }
+  }
+}
+```
 
 ## Auto-externalization
 

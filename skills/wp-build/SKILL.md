@@ -1,7 +1,7 @@
 ---
 name: wp-build
-description: "Use when developing WordPress plugins with @wordpress/build: the next-generation esbuild-based build tool with convention-over-configuration approach, packages/ and routes/ directory structures, automatic PHP generation, and two page modes (fullscreen vs wp-admin)."
-compatibility: "Targets WordPress 6.5+ (Requires Script Modules/Import Maps). Requires npm workspaces, Node.js 20+, and @wordpress/build package."
+description: "Use when developing WordPress plugins with @wordpress/build: the next-generation esbuild-based build tool with convention-over-configuration approach, `packages/` plus experimental `routes/`, automatic PHP generation, worker bundling, and two page modes (fullscreen vs wp-admin)."
+compatibility: "Requires modern Node/npm (`@wordpress/build` 0.13.0 declares Node >=20.10 and npm >=10.2). Script Modules/Import Maps need WordPress 6.5+, but page/routing workflows now assume `@wordpress/boot`, `@wordpress/route`, and `@wordpress/theme` are provided by WordPress Core 7.0+ or by the Gutenberg plugin because `@wordpress/build` no longer bundles them. `routes/` and `wpPlugin.pages` remain experimental."
 ---
 
 # WP Build (@wordpress/build)
@@ -12,7 +12,7 @@ Use this skill for plugin development with `@wordpress/build`:
 
 - setting up a new plugin with `@wordpress/build` (not `@wordpress/scripts`)
 - organizing code in `packages/` directory with proper `package.json` configuration
-- creating admin pages with `routes/` directory (fullscreen or wp-admin mode)
+- creating admin pages with experimental `routes/` directory (fullscreen or wp-admin mode)
 - configuring `wpPlugin` in root `package.json`
 - registering page menus in PHP for either fullscreen or wp-admin mode
 - implementing route lifecycle hooks (loader, beforeLoad, canvas, inspector)
@@ -23,12 +23,15 @@ Use this skill for plugin development with `@wordpress/build`:
 - Block development (use `wp-block-development` skill instead)
 - Projects using `@wordpress/scripts` (webpack-based)
 - Old WordPress versions (< 6.5) that lack script module support
+- Stable block-plugin workflows; `@wordpress/build` still has gaps there and may require manual workarounds
 
 ## Inputs required
 
 - Repo root and target plugin location.
 - Desired page mode: fullscreen (Site Editor style) or wp-admin integrated.
 - Plugin namespace and naming conventions (`wpPlugin.name`, `packageNamespace`, `handlePrefix`).
+- Whether the plugin can accept experimental routing/page APIs.
+- Target runtime: WordPress Core 7.0+ vs Gutenberg plugin, because page/routing features depend on host-provided boot/route/theme packages.
 
 ## Procedure
 
@@ -43,7 +46,7 @@ my-plugin/
 │       ├── package.json
 │       └── src/
 │           └── index.js
-├── routes/             # Admin page routes (optional)
+├── routes/             # Admin page routes (experimental, optional)
 │   └── {route-name}/
 │       ├── package.json    # Route config (required)
 │       ├── stage.tsx       # Main content (required)
@@ -67,6 +70,12 @@ Add `wpPlugin` configuration block:
     "scriptGlobal": "myPlugin",
     "packageNamespace": "my-plugin",
     "handlePrefix": "my-plugin",
+    "externalNamespaces": {
+      "woo": {
+        "global": "woo",
+        "handlePrefix": "woocommerce"
+      }
+    },
     "pages": [
       "my-admin-page",
       {
@@ -82,6 +91,10 @@ Add `wpPlugin` configuration block:
   }
 }
 ```
+
+Notes:
+- `wpPlugin.pages` object entries may also carry `title` and `experimental` fields in current upstream source.
+- `@wordpress/build` 0.13.0 itself is still pre-1.0; avoid assuming older examples from early blog posts still match generated file names or runtime behavior.
 
 ### 3) Implement Routes with standard UI
 
@@ -106,7 +119,7 @@ export const stage = () => (
 );
 ```
 
-### 4) Use Init Modules for Icons
+### 4) Use Init Modules for Icons in fullscreen pages
 
 Icons and command palette entries should be registered in an init module:
 
@@ -122,6 +135,8 @@ export async function init() {
 }
 ```
 
+This pattern is for fullscreen pages. Current `page-wp-admin.php` uses `@wordpress/boot.initSinglePage()` and does not pass `menuItems` or `initModules`, so sidebar icon/menu customization should not be described as a WP-Admin-mode capability.
+
 ### 5) Register correct page mode in PHP
 
 **CRITICAL: Use the correct slug and callback pair.**
@@ -132,6 +147,8 @@ export async function init() {
 | **WP-Admin** | `page-wp-admin.php` | `{page_id}-wp-admin` | `{plugin}_{page_id}_wp_admin_render_page` |
 
 See `references/page-modes.md` for detailed comparison.
+
+`wpPlugin.pages` and `routes/` are still experimental. Prefer them when the plugin owns the page experience and can tolerate upstream API churn.
 
 ### 6) Integrate PHP
 
@@ -149,15 +166,18 @@ add_action( 'admin_menu', function() {
 - [ ] `build/build.php` exists and is included
 - [ ] Page renders without blank screen
 - [ ] Navigation via `?p=/path` works
-- [ ] Sidebar icons appear (if using init modules)
-- [ ] UI follows WordPress standards (uses `admin-ui` package)
+- [ ] Sidebar icons appear (fullscreen mode only, if using init modules)
+- [ ] UI follows WordPress standards (uses `admin-ui` package when appropriate)
+- [ ] Experimental assumptions are still valid against the current upstream docs
 
 ## Failure modes / debugging
 
 - **Blank screen**: Check console for module loading errors; check PHP callback names.
 - **Wrong layout**: Mixing Fullscreen callback with WP-Admin slug or vice versa.
 - **Route 404**: Check `route.page` in route `package.json`.
-- **Icons missing**: Init module not exported correctly or not registered in `wpPlugin.pages`.
+- **Icons missing**: Init module not exported correctly or not registered in `wpPlugin.pages`, or you are testing in WP-Admin mode where `initModules`/boot menu items are not wired in.
+- **Page features fail on older hosts**: Since `@wordpress/build` 0.10.0, page/routing flows expect `@wordpress/boot`, `@wordpress/route`, and `@wordpress/theme` from Core 7.0+ or the Gutenberg plugin.
+- **Standalone plugin setup friction**: Confirm npm workspaces, installed `@wordpress/*` metadata, and any hidden transitive requirements noted upstream.
 
 ## References
 

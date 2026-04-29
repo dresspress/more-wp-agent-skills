@@ -1,6 +1,6 @@
 # Routes
 
-Use this file when creating admin page routes in the `routes/` directory.
+Use this file when creating admin page routes in the experimental `routes/` directory.
 
 ## Route structure
 
@@ -46,6 +46,8 @@ A route can appear on multiple pages:
   }
 }
 ```
+
+`route.page` values should usually match entries declared in `wpPlugin.pages`. Current upstream docs also say they can target existing pages registered by other plugins, but treat that as experimental behavior and verify it in the specific host/plugin combination you care about.
 
 ## Route components
 
@@ -160,6 +162,8 @@ $url = admin_url(
 2. **Wrong file name**: Must be exactly `stage.tsx`, `inspector.tsx`, etc.
 3. **Missing package.json**: Route directory must have `package.json` with `route` config
 4. **Page mismatch**: `route.page` must match an entry in `wpPlugin.pages`
+5. **Assuming route APIs are stable**: `routes/` is still experimental; re-check upstream docs when adopting new behavior
+6. **Assuming fullscreen-only boot features exist in WP-Admin mode**: current generated `page-wp-admin.php` uses `initSinglePage()` and does not pass `initModules` or sidebar `menuItems`
 
 Upstream reference:
 

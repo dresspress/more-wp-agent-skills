@@ -16,7 +16,7 @@ These skills follow the same format as the official WordPress agent-skills and c
 
 The official WordPress agent-skills repository focuses on stable, widely-adopted workflows. This repository covers:
 
-- Emerging tools still in experimental phase (e.g., `@wordpress/build`)
+- Emerging tools and experimental workflows (e.g., `@wordpress/build`, especially `routes/` / `wpPlugin.pages`)
 - Specialized workflows not yet covered upstream
 - Extended references for complex configurations
 

@@ -11,7 +11,7 @@
 | **PHP File** | `build/pages/{page_id}/page.php` | `build/pages/{page_id}/page-wp-admin.php` |
 | **WP Sidebar** | Hidden (Takes over screen) | Visible (Standard sidebar) |
 | **Header** | Custom (from JS) | Standard WP Header |
-| **JS Init** | `mod.init()` | `mod.initSinglePage()` |
+| **JS Init** | `@wordpress/boot.init()` | `@wordpress/boot.initSinglePage()` |
 | **Best For** | Immersive apps, Editors | Settings, Dashboards, CRUD lists |
 
 ## 1. Fullscreen Mode
@@ -35,7 +35,7 @@ add_menu_page(
 ### Characteristics
 - Hides the WordPress admin bar (`#wpadminbar { display: none; }`).
 - Sets `height: 100vh` on the app container.
-- Uses `init()` from `@wordpress/boot` which includes the application sidebar (defined by menu items).
+- Uses the full-page boot flow from `@wordpress/boot`.
 
 ## 2. WP-Admin Mode
 
@@ -57,7 +57,10 @@ add_submenu_page(
 ### Characteristics
 - Resets standard `#wpcontent` padding to allow the app to fill the space.
 - Hides legacy admin elements (like notices) that might interfere with the UI.
-- Uses `initSinglePage()` from `@wordpress/boot` which **disables** the app-level sidebar (to avoid having two sidebars).
+- Uses the single-page boot flow from `@wordpress/boot`.
+- Does not wire fullscreen-style `menuItems` or `initModules`; route rendering works, but sidebar/menu icon customization is not the same capability surface as full-page mode.
+
+The exact `@wordpress/boot` internals are evolving faster than its published package reference. Keep examples focused on observable page behavior, not internal method guarantees, unless you have confirmed them against the current source.
 
 ## Critical Implementation Rule
 

@@ -22,12 +22,21 @@ my-plugin/
 │       └── route.tsx
 ├── build/              # Auto-generated (do not edit)
 │   ├── build.php
+│   ├── modules.php
+│   ├── scripts.php
+│   ├── styles.php
+│   ├── routes.php
+│   ├── pages.php
 │   ├── routes/
 │   │   ├── {route-name}/
 │   │   │   ├── content.js
 │   │   │   └── route.js
 │   │   └── registry.php
-│   └── routes.php
+│   └── pages/
+│       └── {page-id}/
+│           ├── loader.js
+│           ├── page.php
+│           └── page-wp-admin.php
 ├── package.json        # Root config with wpPlugin
 └── my-plugin.php       # Plugin entry point
 ```

@@ -59,6 +59,11 @@ Open the browser console. If you see "Module not found" or "failed to load scrip
 - Ensure you are on a modern browser.
 - Ensure WordPress is up to date.
 
+### Page/routing code loads but boot APIs are missing
+- As of `@wordpress/build` 0.10.0, page/routing features no longer bundle `@wordpress/boot`, `@wordpress/route`, `@wordpress/theme`, or `@wordpress/private-apis`.
+- Verify the host is WordPress Core 7.0+ or the Gutenberg plugin is active.
+- If the page works in fullscreen mode but not in WP-Admin mode, confirm you are not relying on fullscreen-only `initModules` or boot sidebar menu items.
+
 ### Dependency version mismatch
 - Check `.asset.php` files in `build/` to see what dependencies are being registered.
 - Ensure all `@wordpress/*` packages in your monorepo are using compatible versions.
