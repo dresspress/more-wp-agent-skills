@@ -13,6 +13,7 @@ Use this skill for plugin development with `@wordpress/build`:
 - setting up a new plugin with `@wordpress/build` (not `@wordpress/scripts`)
 - organizing code in `packages/` directory with proper `package.json` configuration
 - creating admin pages with experimental `routes/` directory (fullscreen or wp-admin mode)
+- designing fullscreen SPA sidebar navigation/menu hierarchies with PHP-first registration
 - configuring `wpPlugin` in root `package.json`
 - registering page menus in PHP for either fullscreen or wp-admin mode
 - implementing route lifecycle hooks (loader, beforeLoad, canvas, inspector)
@@ -32,6 +33,7 @@ Use this skill for plugin development with `@wordpress/build`:
 - Plugin namespace and naming conventions (`wpPlugin.name`, `packageNamespace`, `handlePrefix`).
 - Whether the plugin can accept experimental routing/page APIs.
 - Target runtime: WordPress Core 7.0+ vs Gutenberg plugin, because page/routing features depend on host-provided boot/route/theme packages.
+- Desired sidebar information architecture for fullscreen pages: top-level routes, parent groups, and whether grouped children should use `dropdown` or `drilldown`.
 
 ## Procedure
 
@@ -137,7 +139,28 @@ export async function init() {
 
 This pattern is for fullscreen pages. Current `page-wp-admin.php` uses `@wordpress/boot.initSinglePage()` and does not pass `menuItems` or `initModules`, so sidebar icon/menu customization should not be described as a WP-Admin-mode capability.
 
-### 5) Register correct page mode in PHP
+### 5) Treat fullscreen sidebar navigation as PHP-first architecture
+
+For fullscreen pages, define menu structure, nesting, and order in PHP first, then use JS only for icon mapping or light metadata updates.
+
+Use the generated helper function from `build/build.php`:
+
+```php
+{prefix}_register_{page_slug}_menu_item( $id, $label, $to, $parent_id = '', $parent_type = '' );
+```
+
+Rules:
+- Register top-level items in PHP call order; that order becomes the rendered sidebar order.
+- Use real route paths for navigable items such as `/`, `/analytics`, or `/settings/general`.
+- For parent groups, set `$to` to an empty string and choose `parent_type` deliberately:
+  - `dropdown` is the default and recommended mode for settings/data-management groups.
+  - `drilldown` is for immersive sub-sections that should open in a dedicated sliding panel.
+- Pass the parent item ID as `$parent_id` when registering children.
+- Do not try to build or reorder the menu tree in JS with `dispatch( bootStore ).updateMenuItem()`. Use JS to attach icons, not to define the authoritative hierarchy.
+
+See `references/navigation.md` for examples and detailed guidance.
+
+### 6) Register correct page mode in PHP
 
 **CRITICAL: Use the correct slug and callback pair.**
 
@@ -150,7 +173,7 @@ See `references/page-modes.md` for detailed comparison.
 
 `wpPlugin.pages` and `routes/` are still experimental. Prefer them when the plugin owns the page experience and can tolerate upstream API churn.
 
-### 6) Integrate PHP
+### 7) Integrate PHP
 
 ```php
 require_once plugin_dir_path( __FILE__ ) . 'build/build.php';
@@ -166,6 +189,7 @@ add_action( 'admin_menu', function() {
 - [ ] `build/build.php` exists and is included
 - [ ] Page renders without blank screen
 - [ ] Navigation via `?p=/path` works
+- [ ] Fullscreen menu order and parent/child hierarchy come entirely from PHP registration
 - [ ] Sidebar icons appear (fullscreen mode only, if using init modules)
 - [ ] UI follows WordPress standards (uses `admin-ui` package when appropriate)
 - [ ] Experimental assumptions are still valid against the current upstream docs
@@ -175,7 +199,9 @@ add_action( 'admin_menu', function() {
 - **Blank screen**: Check console for module loading errors; check PHP callback names.
 - **Wrong layout**: Mixing Fullscreen callback with WP-Admin slug or vice versa.
 - **Route 404**: Check `route.page` in route `package.json`.
+- **Menu hierarchy looks wrong**: Check PHP registration order, `parent_id`, and `parent_type` before debugging JS.
 - **Icons missing**: Init module not exported correctly or not registered in `wpPlugin.pages`, or you are testing in WP-Admin mode where `initModules`/boot menu items are not wired in.
+- **Menu order flashes or mutates in JS**: Remove client-side tree construction; PHP should emit the final ordered hierarchy.
 - **Page features fail on older hosts**: Since `@wordpress/build` 0.10.0, page/routing flows expect `@wordpress/boot`, `@wordpress/route`, and `@wordpress/theme` from Core 7.0+ or the Gutenberg plugin.
 - **Standalone plugin setup friction**: Confirm npm workspaces, installed `@wordpress/*` metadata, and any hidden transitive requirements noted upstream.
 
@@ -185,6 +211,7 @@ add_action( 'admin_menu', function() {
 - `references/directory-structure.md` - Where files go
 - `references/packages.md` - Creating JS packages
 - `references/routes.md` - Implementing routes and hooks
+- `references/navigation.md` - Fullscreen SPA navigation/menu architecture
 - `references/page-modes.md` - Fullscreen vs Integrated
 - `references/php-integration.md` - PHP helper functions
 - `references/debugging.md` - Troubleshooting guide
