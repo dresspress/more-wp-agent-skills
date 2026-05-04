@@ -11,7 +11,7 @@ The root `package.json` contains plugin-wide settings in the `wpPlugin` block:
   "name": "my-awesome-plugin",
   "version": "1.0.0",
     "wpPlugin": {
-      "name": "my-awesome-plugin",
+      "name": "my_awesome_plugin",
       "scriptGlobal": "myPlugin",
       "packageNamespace": "my-plugin",
       "handlePrefix": "my-plugin",
@@ -43,7 +43,7 @@ The root `package.json` contains plugin-wide settings in the `wpPlugin` block:
 
 | Field | Type | Description | Example |
 |-------|------|-------------|---------|
-| `name` | string | Prefix for generated PHP functions; must be a valid PHP function-name prefix | `"my_plugin"` |
+| `name` | string | Prefix for generated PHP functions; must be a valid PHP function-name prefix, so avoid kebab-case here | `"my_plugin"` |
 | `scriptGlobal` | string \| false | Global variable name on `window`, or `false` to disable global exposure | `"myPlugin"` → `window.myPlugin` |
 | `packageNamespace` | string | Package scope (without `@`) used for global exposure matching | `"my-plugin"` → `@my-plugin/*` |
 | `handlePrefix` | string | WordPress script handle prefix; defaults to `packageNamespace` | `"my-plugin"` → `my-plugin-editor` |
@@ -63,6 +63,8 @@ Each package in `packages/` can have these fields:
 | `wpStyleEntryPoints` | object/array | Custom SASS entry points. |
 | `wpCopyFiles` | array | Files to copy, with optional `transform: "php"`. |
 | `wpWorkers` | object | Web Worker entry points; supports string or object values. |
+
+`@wordpress/build` also emits ESM-facing artifacts in `build-module/` for module entry points. When documenting outputs, do not describe the system as producing only `build/`.
 
 ### Example: Advanced package config
 ```json
@@ -99,7 +101,7 @@ Pages can be strings or objects:
 - **Status**: Experimental; expect API churn
 - **Current-source fields**: object entries also support `title` and `experimental`, even though upstream README coverage is still thin
 
-Init modules must export an `init()` function that runs before routes are registered.
+Init modules must export a named `init()` function. These modules are loaded as static dependencies and executed sequentially before the boot system registers menu items and routes.
 
 ## Compatibility notes
 
@@ -113,7 +115,7 @@ Given this configuration:
 ```json
 {
   "wpPlugin": {
-    "name": "my-plugin",
+    "name": "my_plugin",
     "scriptGlobal": "myPlugin",
     "packageNamespace": "my-plugin",
     "handlePrefix": "mp"

@@ -20,6 +20,11 @@ my-plugin/
 │       ├── inspector.tsx
 │       ├── canvas.tsx
 │       └── route.tsx
+├── widgets/            # Self-contained script-module widgets (experimental)
+│   └── {name}/
+│       ├── widget.json
+│       ├── widget.ts
+│       └── render.tsx
 ├── build/              # Auto-generated (do not edit)
 │   ├── build.php
 │   ├── modules.php
@@ -37,6 +42,7 @@ my-plugin/
 │           ├── loader.js
 │           ├── page.php
 │           └── page-wp-admin.php
+├── build-module/       # Auto-generated ESM output for module entry points
 ├── package.json        # Root config with wpPlugin
 └── my-plugin.php       # Plugin entry point
 ```
@@ -59,6 +65,15 @@ Each subdirectory is an admin page route:
 - Uses convention-based file names (stage.tsx, inspector.tsx, etc.)
 - Lazy-loaded by default
 
+### widgets/
+
+Each subdirectory is an experimental widget:
+
+- `widget.json` for static metadata
+- `widget.ts` for metadata needing runtime logic or i18n
+- `render.tsx` for the UI entry
+- Built into `build/widgets/` registration assets
+
 ### build/
 
 Auto-generated output directory:
@@ -73,6 +88,7 @@ Auto-generated output directory:
 2. **Missing package.json**: Each package/route needs its own `package.json`
 3. **Source not in src/**: Package source must be in `src/` subdirectory
 4. **Editing build/**: Changes will be overwritten
+5. **Forgetting build-module/**: Some module outputs are emitted there, not only under `build/`
 
 Upstream reference:
 

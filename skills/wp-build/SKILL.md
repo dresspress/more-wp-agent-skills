@@ -13,6 +13,7 @@ Use this skill for plugin development with `@wordpress/build`:
 - setting up a new plugin with `@wordpress/build` (not `@wordpress/scripts`)
 - organizing code in `packages/` directory with proper `package.json` configuration
 - creating admin pages with experimental `routes/` directory (fullscreen or wp-admin mode)
+- creating experimental `widgets/` entries when a plugin needs self-contained script-module widgets
 - designing fullscreen SPA sidebar navigation/menu hierarchies with PHP-first registration
 - configuring `wpPlugin` in root `package.json`
 - registering page menus in PHP for either fullscreen or wp-admin mode
@@ -34,6 +35,7 @@ Use this skill for plugin development with `@wordpress/build`:
 - Whether the plugin can accept experimental routing/page APIs.
 - Target runtime: WordPress Core 7.0+ vs Gutenberg plugin, because page/routing features depend on host-provided boot/route/theme packages.
 - Desired sidebar information architecture for fullscreen pages: top-level routes, parent groups, and whether grouped children should use `dropdown` or `drilldown`.
+- Whether the plugin needs experimental widget discovery under `widgets/`.
 
 ## Procedure
 
@@ -68,7 +70,7 @@ Add `wpPlugin` configuration block:
 {
   "name": "my-plugin",
   "wpPlugin": {
-    "name": "my-plugin",
+    "name": "my_plugin",
     "scriptGlobal": "myPlugin",
     "packageNamespace": "my-plugin",
     "handlePrefix": "my-plugin",
@@ -95,6 +97,7 @@ Add `wpPlugin` configuration block:
 ```
 
 Notes:
+- `wpPlugin.name` is **not** the npm package name. It must be a valid PHP function-name prefix, so do not use hyphens there.
 - `wpPlugin.pages` object entries may also carry `title` and `experimental` fields in current upstream source.
 - `@wordpress/build` 0.13.0 itself is still pre-1.0; avoid assuming older examples from early blog posts still match generated file names or runtime behavior.
 
@@ -136,6 +139,8 @@ export async function init() {
     dispatch( bootStore ).updateMenuItem( 'settings-page', { icon: settings } );
 }
 ```
+
+The named `init()` export is mandatory. Init modules are loaded as static dependencies and executed sequentially before the boot system registers menu items and routes.
 
 This pattern is for fullscreen pages. Current `page-wp-admin.php` uses `@wordpress/boot.initSinglePage()` and does not pass `menuItems` or `initModules`, so sidebar icon/menu customization should not be described as a WP-Admin-mode capability.
 
@@ -183,10 +188,20 @@ add_action( 'admin_menu', function() {
 } );
 ```
 
+### 8) Account for build outputs and experimental widgets
+
+`@wordpress/build` emits both CommonJS-oriented `build/` output and ESM-oriented `build-module/` output. Do not describe the tool as `build/`-only.
+
+If the plugin uses experimental widgets:
+- Create a root-level `widgets/` directory with one subdirectory per widget.
+- Treat widget discovery as experimental and verify generated registration files against the exact host/runtime.
+- See `references/widgets.md` before defining widget metadata or render entries.
+
 ## Verification
 
 - [ ] `npm run build` completes without errors
 - [ ] `build/build.php` exists and is included
+- [ ] Generated outputs match the expected `build/` and `build-module/` split
 - [ ] Page renders without blank screen
 - [ ] Navigation via `?p=/path` works
 - [ ] Fullscreen menu order and parent/child hierarchy come entirely from PHP registration
@@ -197,10 +212,12 @@ add_action( 'admin_menu', function() {
 ## Failure modes / debugging
 
 - **Blank screen**: Check console for module loading errors; check PHP callback names.
+- **Generated PHP callbacks have unexpected names**: Check `wpPlugin.name`; it must be a valid PHP function prefix, not a kebab-case slug.
 - **Wrong layout**: Mixing Fullscreen callback with WP-Admin slug or vice versa.
 - **Route 404**: Check `route.page` in route `package.json`.
 - **Menu hierarchy looks wrong**: Check PHP registration order, `parent_id`, and `parent_type` before debugging JS.
 - **Icons missing**: Init module not exported correctly or not registered in `wpPlugin.pages`, or you are testing in WP-Admin mode where `initModules`/boot menu items are not wired in.
+- **Init modules do not run**: Confirm each declared module exports a named async or sync `init()` function.
 - **Menu order flashes or mutates in JS**: Remove client-side tree construction; PHP should emit the final ordered hierarchy.
 - **Page features fail on older hosts**: Since `@wordpress/build` 0.10.0, page/routing flows expect `@wordpress/boot`, `@wordpress/route`, and `@wordpress/theme` from Core 7.0+ or the Gutenberg plugin.
 - **Standalone plugin setup friction**: Confirm npm workspaces, installed `@wordpress/*` metadata, and any hidden transitive requirements noted upstream.
@@ -214,4 +231,5 @@ add_action( 'admin_menu', function() {
 - `references/navigation.md` - Fullscreen SPA navigation/menu architecture
 - `references/page-modes.md` - Fullscreen vs Integrated
 - `references/php-integration.md` - PHP helper functions
+- `references/widgets.md` - Experimental widget discovery and output
 - `references/debugging.md` - Troubleshooting guide

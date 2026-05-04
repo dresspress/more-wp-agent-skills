@@ -47,7 +47,7 @@ A route can appear on multiple pages:
 }
 ```
 
-`route.page` values should usually match entries declared in `wpPlugin.pages`. Current upstream docs also say they can target existing pages registered by other plugins, but treat that as experimental behavior and verify it in the specific host/plugin combination you care about.
+`route.page` values should usually match entries declared in `wpPlugin.pages`. Current upstream docs also say they can target existing pages registered by other plugins; treat that as experimental integration behavior and verify it in the exact host/plugin combination you care about.
 
 ## Route components
 
