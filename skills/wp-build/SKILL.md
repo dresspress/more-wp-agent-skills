@@ -231,14 +231,18 @@ If the plugin uses experimental widgets:
 
 ## Upstream docs
 
-When updating this skill, fetch from these sources in order:
+When updating this skill, fetch from both sources and note any gaps between them:
 
-1. **README (primary)** — `https://raw.githubusercontent.com/WordPress/gutenberg/trunk/packages/wp-build/README.md`
-2. **CHANGELOG** — `https://raw.githubusercontent.com/WordPress/gutenberg/trunk/packages/wp-build/CHANGELOG.md`
-3. **package.json** — `https://raw.githubusercontent.com/WordPress/gutenberg/trunk/packages/wp-build/package.json`
-4. **Recent commits** — `https://api.github.com/repos/WordPress/gutenberg/commits?path=packages/wp-build&per_page=15`
+**GitHub trunk** (latest, may include unreleased changes):
+1. `https://raw.githubusercontent.com/WordPress/gutenberg/trunk/packages/wp-build/README.md`
+2. `https://raw.githubusercontent.com/WordPress/gutenberg/trunk/packages/wp-build/CHANGELOG.md`
+3. `https://raw.githubusercontent.com/WordPress/gutenberg/trunk/packages/wp-build/package.json`
+4. `https://api.github.com/repos/WordPress/gutenberg/commits?path=packages/wp-build&per_page=15`
 
-Rendered docs (may lag behind trunk): `https://developer.wordpress.org/block-editor/reference-guides/packages/packages-wp-build/`
+**WordPress official docs** (reflects what is available in stable releases):
+- `https://developer.wordpress.org/block-editor/reference-guides/packages/packages-wp-build/`
+
+When a feature appears in trunk but not in the official docs, document it as only available via the Gutenberg plugin (not stable WordPress core), and flag it clearly in the skill.
 
 ## References
 

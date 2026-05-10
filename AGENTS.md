@@ -8,7 +8,7 @@ Each skill lives under `skills/{skill-name}/` and follows the standard skill for
 When asked to update a skill (e.g. "更新 wp-build skill"):
 
 1. **Find upstream sources** — read the skill's `SKILL.md` and look for the `## Upstream docs` section. It lists the authoritative URLs to fetch from.
-2. **Fetch all upstream sources** — get README, CHANGELOG, package.json, and recent commits. GitHub `trunk` is always more current than any rendered doc site.
+2. **Fetch all upstream sources** — each skill lists both a GitHub trunk source and an official rendered doc. Fetch both: trunk gives the latest unreleased state; the official docs reflect what is available in stable releases. Note any gaps between the two.
 3. **Read all current skill files** — `SKILL.md` plus every file under `references/`.
 4. **Diff and align** — compare upstream content against the skill. Update for:
    - New features or fields added since the last sync
@@ -28,6 +28,7 @@ When asked to update a skill (e.g. "更新 wp-build skill"):
 
 ## Conventions
 
-- Upstream docs links in skill files should point to the raw source (e.g. GitHub `trunk`) rather than rendered doc sites, which may lag behind.
+- Each skill's `## Upstream docs` section should list both the GitHub trunk raw source and the official rendered doc site. Trunk is more current; the rendered docs reflect stable availability.
+- When a feature exists in trunk but not yet in official docs, note it as Gutenberg-plugin-only and not yet available in stable WordPress core.
 - Mark experimental APIs explicitly; note which version introduced or changed them.
 - Reference files should be focused and cross-reference each other rather than duplicating content.
