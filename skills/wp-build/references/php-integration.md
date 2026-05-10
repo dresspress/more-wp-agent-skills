@@ -57,7 +57,7 @@ add_action( 'admin_menu', function() {
 For each page defined in `wpPlugin.pages`, the build tool generates helper functions to register routes and menu items from PHP. These are useful for dynamic routes or when extensions want to add their own routes.
 
 ### Route Registration
-`{prefix}_register_{page_id}_route( $path, $content_module, $route_module )`
+`{prefix}_register_{page_id}_route( $path, $content_module )`
 
 ```php
 // Register a route for 'my-app-page'
@@ -66,6 +66,8 @@ my_plugin_register_my_app_page_route(
     '@my-plugin/custom-content-module'
 );
 ```
+
+> **Note:** The exact signature of the route registration helper is not fully documented upstream (it is auto-generated and experimental). Verify the generated `build/routes.php` against your actual build output before relying on additional parameters.
 
 ### Menu Item Registration
 `{prefix}_register_{page_id}_menu_item( $id, $label, $to, $parent_id, $parent_type )`

@@ -11,8 +11,8 @@ widgets/
 └── hello-world/
     ├── widget.json     # Static discovery metadata (required)
     ├── widget.ts       # Runtime schema entry (optional)
-    └── render.tsx      # UI render entry (optional)
-    └── render.scss     # Optional styles (bundled inline when imported)
+    ├── render.tsx      # UI render entry (optional)
+    └── render.scss     # Styles imported by render.tsx (optional)
 ```
 
 ## Responsibility split
@@ -20,10 +20,12 @@ widgets/
 - `widget.json`: static metadata — `name`, `title`, `description`, `category`
 - `widget.ts`: runtime schema, typed attributes, i18n labels, `example` data; must export a `default` object with the same `name`
 - `render.tsx`: receives `attributes`, supports CSS/SCSS imports; default export is the render component
+- `render.scss`: styles for the render component; bundled inline when imported from `render.tsx`
 
 Rule of thumb:
 - Put plain static metadata in `widget.json`.
 - Put translated labels or runtime-derived metadata in `widget.ts`.
+- Keep styles in `render.scss` and import them from `render.tsx`.
 
 ## Output shape
 

@@ -77,6 +77,6 @@ Open the browser console. If you see "Module not found" or "failed to load scrip
 - This is expected behavior, not a bug.
 
 ### CSS module styles missing in editor iframes
-- As of the unreleased version after 0.13.0, CSS module styles are registered with `@wordpress/style-runtime` so they can be injected across registered documents (including editor iframes).
+- In Gutenberg plugin versions after `@wordpress/build` 0.13.0, CSS module styles are registered with `@wordpress/style-runtime` so they can be injected across registered documents (including editor iframes).
 - If styles work on the main document but not inside an iframe, check whether `@wordpress/style-runtime` is available on your host.
-- This requires a recent Gutenberg plugin version; WordPress Core 7.0+ compatibility is not yet confirmed.
+- This feature was introduced after 0.13.0; verify your Gutenberg plugin version includes it before debugging further.

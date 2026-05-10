@@ -10,25 +10,26 @@ The root `package.json` contains plugin-wide settings in the `wpPlugin` block:
 {
   "name": "my-awesome-plugin",
   "version": "1.0.0",
-    "wpPlugin": {
-      "name": "my_awesome_plugin",
-      "scriptGlobal": "myPlugin",
-      "packageNamespace": "my-plugin",
-      "handlePrefix": "my-plugin",
-      "externalNamespaces": {
-        "woo": {
-          "global": "woo",
-          "handlePrefix": "woocommerce"
-        }
-      },
-      "pages": [
-        "simple-page",
+  "wpPlugin": {
+    "name": "my_awesome_plugin",
+    "scriptGlobal": "myPlugin",
+    "packageNamespace": "my-plugin",
+    "handlePrefix": "my-plugin",
+    "externalNamespaces": {
+      "woo": {
+        "global": "woo",
+        "handlePrefix": "woocommerce"
+      }
+    },
+    "pages": [
+      "simple-page",
       {
         "id": "complex-page",
         "init": ["@my-plugin/page-init"]
       }
     ]
   },
+  "workspaces": ["packages/*"],
   "scripts": {
     "build": "wp-build",
     "dev": "wp-build --watch"

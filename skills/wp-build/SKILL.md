@@ -57,6 +57,11 @@ my-plugin/
 │       ├── inspector.tsx   # Sidebar (optional)
 │       ├── canvas.tsx      # Custom canvas (optional)
 │       └── route.tsx       # Lifecycle hooks (optional)
+├── widgets/            # Self-contained widgets (experimental, optional)
+│   └── {widget-name}/
+│       ├── widget.json     # Static metadata (required)
+│       ├── widget.ts       # Runtime schema (optional)
+│       └── render.tsx      # UI component (optional)
 ├── build/              # Auto-generated output
 ├── package.json        # Root config with wpPlugin
 └── my-plugin.php       # Plugin main file
