@@ -195,6 +195,8 @@ add_action( 'admin_menu', function() {
 If the plugin uses experimental widgets:
 - Create a root-level `widgets/` directory with one subdirectory per widget.
 - Treat widget discovery as experimental and verify generated registration files against the exact host/runtime.
+- **Widget-to-page wiring is no longer handled by wp-build.** Surface packages use the `{page_id}_script_module_dependencies` PHP filter to inject widget modules into a page. Do not assume widgets auto-appear on any page.
+- Widget types are registered server-side via a PHP registry and exposed through a REST endpoint; check whether the target host version includes this.
 - See `references/widgets.md` before defining widget metadata or render entries.
 
 ## Verification

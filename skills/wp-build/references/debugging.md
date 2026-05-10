@@ -67,3 +67,16 @@ Open the browser console. If you see "Module not found" or "failed to load scrip
 ### Dependency version mismatch
 - Check `.asset.php` files in `build/` to see what dependencies are being registered.
 - Ensure all `@wordpress/*` packages in your monorepo are using compatible versions.
+
+## 6. CSS Module Issues
+
+### Styles missing in tests (NODE_ENV=test)
+- CSS module output intentionally **skips automatic style injection** when `NODE_ENV` is `test`.
+- Node-based DOM implementations (jsdom) do not reliably support modern CSS, so styles are not injected into the DOM during unit tests.
+- If your tests need actual styles in the DOM, run them in a real browser environment instead.
+- This is expected behavior, not a bug.
+
+### CSS module styles missing in editor iframes
+- As of the unreleased version after 0.13.0, CSS module styles are registered with `@wordpress/style-runtime` so they can be injected across registered documents (including editor iframes).
+- If styles work on the main document but not inside an iframe, check whether `@wordpress/style-runtime` is available on your host.
+- This requires a recent Gutenberg plugin version; WordPress Core 7.0+ compatibility is not yet confirmed.

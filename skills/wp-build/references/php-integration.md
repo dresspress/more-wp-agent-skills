@@ -92,7 +92,26 @@ add_action( 'my-app-page_init', function() {
 } );
 ```
 
-## 5. Summary of generated PHP files in `build/`
+## 5. Boot dependencies filter
+
+Each generated page template exposes a WordPress filter that allows surfaces and extensions to append additional script-module dependencies to that page:
+
+```
+{page_id}_script_module_dependencies
+```
+
+Use this filter to inject widget modules or other script-module dependencies into a specific page without modifying the generated PHP:
+
+```php
+add_filter( 'my-admin-page_script_module_dependencies', function( $deps ) {
+    $deps[] = '@my-plugin/widgets/hello-world/render';
+    return $deps;
+} );
+```
+
+This is the canonical way for surface packages to wire registered widgets into a page.
+
+## 6. Summary of generated PHP files in `build/`
 
 - `build.php`: Main entry point (include this!).
 - `constants.php`: Build-time constants (URLs, paths).
@@ -101,9 +120,11 @@ add_action( 'my-app-page_init', function() {
 - `styles.php`: Style registration.
 - `routes.php`: Route registration helpers.
 - `pages.php`: Loader for all generated page files.
+- `widgets.php`: Widget script module registration (if `widgets/` directory is used).
 - `modules/registry.php`: Script module metadata registry.
 - `scripts/registry.php`: Script metadata registry.
 - `styles/registry.php`: Style metadata registry.
 - `routes/registry.php`: Route metadata registry.
+- `widgets/registry.php`: Widget metadata registry.
 - `pages/{id}/page.php`: Fullscreen mode logic for a specific page.
 - `pages/{id}/page-wp-admin.php`: WP-Admin mode logic for a specific page.
