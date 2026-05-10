@@ -92,4 +92,4 @@ Auto-generated output directory:
 
 Upstream reference:
 
-- https://developer.wordpress.org/block-editor/reference-guides/packages/packages-wp-build/
+- https://raw.githubusercontent.com/WordPress/gutenberg/trunk/packages/wp-build/README.md

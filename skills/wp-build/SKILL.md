@@ -229,6 +229,17 @@ If the plugin uses experimental widgets:
 - **Page features fail on older hosts**: Since `@wordpress/build` 0.10.0, page/routing flows expect `@wordpress/boot`, `@wordpress/route`, and `@wordpress/theme` from Core 7.0+ or the Gutenberg plugin.
 - **Standalone plugin setup friction**: Confirm npm workspaces, installed `@wordpress/*` metadata, and any hidden transitive requirements noted upstream.
 
+## Upstream docs
+
+When updating this skill, fetch from these sources in order:
+
+1. **README (primary)** — `https://raw.githubusercontent.com/WordPress/gutenberg/trunk/packages/wp-build/README.md`
+2. **CHANGELOG** — `https://raw.githubusercontent.com/WordPress/gutenberg/trunk/packages/wp-build/CHANGELOG.md`
+3. **package.json** — `https://raw.githubusercontent.com/WordPress/gutenberg/trunk/packages/wp-build/package.json`
+4. **Recent commits** — `https://api.github.com/repos/WordPress/gutenberg/commits?path=packages/wp-build&per_page=15`
+
+Rendered docs (may lag behind trunk): `https://developer.wordpress.org/block-editor/reference-guides/packages/packages-wp-build/`
+
 ## References
 
 - `references/configuration.md` - `package.json` fields
