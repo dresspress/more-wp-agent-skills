@@ -6,7 +6,7 @@ Supplementary agent skills for WordPress development, extending the official [Wo
 
 | Skill | Description |
 |-------|-------------|
-| [wp-build](./skills/wp-build/SKILL.md) | Development with `@wordpress/build` - the next-generation esbuild-based build tool with convention-over-configuration approach |
+| [wp-build](./skills/wp-build/SKILL.md) | Upstream-first guidance for `@wordpress/build`, focused on verification workflow, experimental caveats, and generated-output checks |
 
 ## Usage
 
@@ -18,7 +18,7 @@ The official WordPress agent-skills repository focuses on stable, widely-adopted
 
 - Emerging tools and experimental workflows (e.g., `@wordpress/build`, especially `routes/` / `wpPlugin.pages`)
 - Specialized workflows not yet covered upstream
-- Extended references for complex configurations
+- Upstream-first supplements for workflows where official docs and trunk source can drift
 
 ## Contributing
 
