@@ -55,6 +55,10 @@ Widget behavior has moved quickly. Verify whether the current package only disco
 
 Do not assume widgets automatically appear in a page UI. Check the host surface and generated dependency/filter behavior.
 
+## CSS Modules and styling
+
+As of version 0.14.0, generated CSS Module styles are registered to `@wordpress/style-runtime`. This is critical for ensuring that styles are correctly injected into registered documents, such as **editor iframes**. If you encounter missing styles when a component renders inside an iframe, verify that the project is using a recent version of `@wordpress/build` and that the styles are processed as CSS Modules.
+
 ## Dependency and host assumptions
 
 Do not hard-code compatibility claims from this skill. Check current `package.json` peer dependencies, changelog notes, generated asset files, and the target WordPress/Gutenberg runtime.
