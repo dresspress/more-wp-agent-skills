@@ -8,6 +8,7 @@ Use this checklist after implementing or debugging an `@wordpress/build` project
 - Confirm generated PHP files exist and match the current upstream expectations.
 - Confirm generated asset files list the dependencies you expect.
 - Confirm `build/` and `build-module/` output roles match the current package behavior.
+- Confirm widgets config (like optional `presentation` setting) generated appropriate properties inside `build/widgets/registry.php`.
 
 ## PHP checks
 
@@ -15,6 +16,7 @@ Use this checklist after implementing or debugging an `@wordpress/build` project
 - Verify the actual generated callback names before registering admin menus.
 - Verify the selected page mode uses the matching slug and callback.
 - Inspect generated route/menu/widget helpers before calling them from custom PHP.
+- Confirm widgets' script module handles (such as render/widget modules) are registered and resolved properly, and verify they are injected as dynamic `$boot_dependencies` in generated page templates.
 
 ## Runtime checks
 

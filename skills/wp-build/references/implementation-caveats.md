@@ -36,6 +36,8 @@ Fullscreen and WP-Admin modes can have different boot inputs and generated callb
 
 Do not describe fullscreen sidebar customization as a WP-Admin-mode capability unless the current generated WP-Admin template passes the needed boot data.
 
+Additionally, as of version 0.14.0+, the generated `build/pages.php` loader uses `file_exists()` checks to guard `require_once` statements. This prevents fatal errors during concurrent/hot deployments when files may briefly be missing on disk during high-traffic writes.
+
 ## Generated PHP helpers
 
 Generated helper names and signatures have changed before. Never invent them from memory.
@@ -47,13 +49,19 @@ After running the build, inspect:
 - `build/pages.php`
 - `build/pages/{page}/page.php`
 - `build/pages/{page}/page-wp-admin.php`
-- `build/widgets.php` when widgets are used
+- `build/widgets.php` when widgets are used (note the presence of `{{PREFIX}}_get_registered_widget_modules()` which memoizes discovered widgets and resolves dynamic handles).
+
+Note: The generated loader files and registration templates (e.g. `module-registration.php.template`) now wrap `require_once` inside `file_exists()` conditionals to avoid fatal errors during concurrent deployment races.
 
 ## Widgets
 
-Widget behavior has moved quickly. Verify whether the current package only discovers/registers widget modules or also wires them into pages.
+Widget behavior has moved quickly. 
 
-Do not assume widgets automatically appear in a page UI. Check the host surface and generated dependency/filter behavior.
+Key 0.15.0+ updates to verify:
+- **`widget.json` `presentation` property**: Supports `'framed' | 'full-bleed'` to describe the rendering intent of a widget. Check `widget.json` metadata for this key, which will generate `'presentation' => ...` mappings inside `build/widgets/registry.php`.
+- **Local tsconfig config**: Widgets directories support local TypeScript compile checking (`@wordpress/*`, JSX, and CSS modules resolution).
+- **Local `package.json`**: Each widget directory under `widgets/` supports an optional local `package.json` as an npm dependencies manifest.
+- **Dynamic boot dependencies**: Generated page templates (`page.php` and `page-wp-admin.php`) now automatically resolve registered widgets and inject their handles (`widget_module` and `render_module`) as dynamic `$boot_dependencies` to ensure assets load properly on active pages.
 
 ## CSS Modules and styling
 
@@ -62,3 +70,5 @@ As of version 0.14.0, generated CSS Module styles are registered to `@wordpress/
 ## Dependency and host assumptions
 
 Do not hard-code compatibility claims from this skill. Check current `package.json` peer dependencies, changelog notes, generated asset files, and the target WordPress/Gutenberg runtime.
+
+Additionally, as of version 0.14.0+, the build tool Compose IIFE bundles replace esbuild's getter-based exports with data properties using a footer shallow copy (`Object.assign({}, globalName)`) to materialize exports. This optimizes runtime performance during editor mount by preventing excessive getter calls on dynamic imports.
