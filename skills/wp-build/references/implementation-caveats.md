@@ -42,6 +42,8 @@ Do not describe fullscreen sidebar customization as a WP-Admin-mode capability u
 
 Additionally, as of version 0.14.0+, the generated `build/pages.php` loader uses `file_exists()` checks to guard `require_once` statements. This prevents fatal errors during concurrent/hot deployments when files may briefly be missing on disk during high-traffic writes.
 
+For single-page admin configurations (version 0.15.0+), the generated templates defer the dynamic `import( "@wordpress/boot" )` call until the `DOMContentLoaded` event fires. This ensures the boot script evaluates only after classic (non-module) script dependencies are fully loaded.
+
 ## Generated PHP helpers
 
 Generated helper names and signatures have changed before. Never invent them from memory.
@@ -68,14 +70,19 @@ Key 0.15.0+ updates to verify:
 - **Local `package.json`**: Each widget directory under `widgets/` supports an optional local `package.json` as an npm dependencies manifest.
 - **Dynamic boot dependencies**: Generated page templates (`page.php` and `page-wp-admin.php`) now automatically resolve registered widgets and inject their handles (`widget_module` and `render_module`) as dynamic `$boot_dependencies` to ensure assets load properly on active pages.
 
-## CSS Modules and styling
-
 As of version 0.14.0, generated CSS Module styles are registered to `@wordpress/style-runtime`. This is critical for ensuring that styles are correctly injected into registered documents, such as **editor iframes**. If you encounter missing styles when a component renders inside an iframe, verify that the project is using a recent version of `@wordpress/build` and that the styles are processed as CSS Modules.
+
+Key styling updates since 0.11.0:
+- **`data-wp-hash` calculation (0.11.0+)**: The build system derives the `data-wp-hash` attribute from the *transformed* CSS output instead of the raw source CSS. This prevents style hydration mismatches when multiple asset-processing pipelines modify the same files.
+- **`#wpwrap` background removal (0.16.0+)**: The incorrect `#wpwrap` background color styling was removed from the generated wp-admin critical CSS. It now relies on the browser-native `body` background styling to prevent a temporary black flash during initial page load/hydration.
 
 ## Dependency and host assumptions
 
 Do not hard-code compatibility claims from this skill. Check current `package.json` peer dependencies, changelog notes, generated asset files, and the target WordPress/Gutenberg runtime.
 
-Additionally, note that in `@wordpress/build` version 0.14.0, esbuild's getter-based exports were replaced with data properties using a footer shallow copy (`Object.assign({}, globalName)`). However, **this optimization was reverted in version 0.16.0** to restore compatibility for Gutenberg 23.0 builds.
+Key runtime/dependency shifts:
+- **Unbundled core packages (0.10.0+)**: Core packages `@wordpress/boot`, `@wordpress/route`, `@wordpress/theme`, and `@wordpress/private-apis` are **no longer bundled** by `@wordpress/build`. They must be provided by the host environment—either **WordPress Core (7.0+)** or an active **Gutenberg plugin**. Plugins relying on these packages for pages or routes will fail to boot on older WordPress versions unless Gutenberg is active.
+- **Namespaced import fallback (0.16.0+)**: When a namespaced import (matching your configured `@packageNamespace/*`) resolves to a package that is not installed in the local node dependencies, `getPackageInfo` returns `null` instead of throwing. This prevents build crashes, allowing esbuild to fall through and try to resolve the import using its standard pathing.
+- **Getter export reversion (0.16.0+)**: In `@wordpress/build` version 0.14.0, esbuild's getter-based exports were replaced with data properties using a footer shallow copy (`Object.assign({}, globalName)`). However, **this optimization was reverted in version 0.16.0** to restore compatibility for Gutenberg 23.0 builds.
 
 At runtime, `@wordpress/boot` now runs on React 19. If writing UI components for page navigation or dashboard views, migrate from the legacy `@wordpress/components` `Tooltip` to the new `@wordpress/ui` compound components (e.g. `<Tooltip.Root>`, `<Tooltip.Trigger>`, `<Tooltip.Popup>`) as the old version is phased out from the boot shell.

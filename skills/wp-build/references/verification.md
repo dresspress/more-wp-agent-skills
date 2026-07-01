@@ -25,9 +25,12 @@ Use this checklist after implementing or debugging an `@wordpress/build` project
 - Confirm script modules resolve and import maps are present.
 - Confirm route deep links using the `p` query parameter work where expected.
 - Confirm fullscreen-specific features are not being tested in WP-Admin mode unless current source supports them.
+- Confirm the host environment provides `@wordpress/boot`, `@wordpress/route`, `@wordpress/theme`, and `@wordpress/private-apis` (requires WordPress Core 7.0+ or Gutenberg plugin active).
+- Verify there is no black flash before hydration (relying on `body` background rather than `#wpwrap` critical CSS).
 
 ## Experimental checks
 
 - Re-check upstream docs/source when adopting routes, pages, or widgets.
 - Note any source/docs discrepancy in the implementation summary.
 - Avoid declaring an experimental behavior stable just because it worked in one generated build.
+- Validate that namespaced imports resolving to non-installed local packages compile successfully and fall through to esbuild resolution without crashing the build.
