@@ -7,7 +7,7 @@ Supplementary agent skills for WordPress development, extending the official [Wo
 | Skill | Description |
 |-------|-------------|
 | [wp-build](./skills/wp-build/SKILL.md) | Upstream-first guidance for `@wordpress/build`, focused on verification workflow, experimental caveats, and generated-output checks |
-| [wp-styling](./skills/wp-styling/SKILL.md) | CSS and styling architecture in WordPress: specificity management, avoiding `!important`, design tokens (`var(--wp--preset--*)`), and admin/frontend scoping |
+| [wp-styling](./skills/wp-styling/SKILL.md) | Practical CSS guardrails supplementing official skills: specificity management, avoiding `!important`, `:where()` patterns, and admin style containment |
 
 ## Usage
 
