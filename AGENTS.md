@@ -3,7 +3,35 @@
 This repo contains supplementary Claude Code skills for WordPress development.
 Each skill lives under `skills/{skill-name}/` and follows the standard skill format.
 
-## Updating a skill
+## Ingesting User Ideas and Daily Experiences
+
+The user uses this repo as a living knowledge base, dropping in tips, anti-patterns, edge cases, and gotchas encountered during daily WordPress development (themes, plugins, blocks).
+
+When the user shares a new idea or practice:
+
+1. **Triage and Route**:
+   - Evaluate where the insight belongs:
+     - **Existing skill**: Does it fit into an existing skill (e.g., `wp-styling` for CSS/tokens/specificity, `wp-build` for Vite/bundling/routes)? Decide whether to extend an existing `references/*.md` or create a new focused reference file.
+     - **New skill**: If it represents a distinct, cohesive WordPress domain not covered upstream or in this repo, propose creating a new skill following the [Adding a new skill](#adding-a-new-skill) flow.
+     - **Global rule**: If it is a universal behavioral constraint rather than technical guidance, suggest placing it in global rules.
+   - Explain the chosen placement and rationale clearly and concisely.
+
+2. **Formalize into Production-Grade Knowledge**:
+   - Transform informal or shorthand notes into structured, professional documentation in English:
+     - **The Mechanism & Problem**: Explain *why* this matters in WordPress (e.g., style hierarchy, admin DOM sharing, hook execution order).
+     - **The Rule**: Clear, unambiguous directive.
+     - **Code Patterns**: Side-by-side Anti-pattern vs Recommended pattern snippets.
+     - **Exceptions**: Document any valid exceptions or legacy fallbacks.
+     - **Verification**: How an agent or developer can test or verify compliance.
+
+3. **Update Index and Links**:
+   - If adding a new reference file, register it in the skill's `SKILL.md` under `## Reference topics`.
+   - If adding a new skill, register it in `README.md`.
+
+4. **Commit Incrementally**:
+   - Autonomous commit with Conventional Commits: `docs({skill-name}): add guidance on {topic}`.
+
+## Updating a skill from upstream
 
 When asked to update a skill (e.g. "更新 wp-build skill"):
 
