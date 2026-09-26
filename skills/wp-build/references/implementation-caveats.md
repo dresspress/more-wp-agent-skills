@@ -17,9 +17,10 @@ Before depending on them, check:
 
 Do not assume every documented route behavior is active for every target page. Current source has historically filtered generated route data through active `wpPlugin.pages`; verify this before relying on routes that target pages registered elsewhere.
 
-Do not assume route filenames are `.tsx` only. Check `route-utils.mjs` for the current extension list.
-
-Do not assume a custom `canvas`-only route is registered correctly. Verify whether the current build treats `canvas` as content for route registry purposes.
+Key routing updates since v0.20.0+:
+- **Extension support (0.24.0+)**: Route files support `.tsx`, `.ts`, `.jsx`, `.mts`, `.cts`, `.mjs`, and `.cjs`. Note that as of 0.23.0+, **JSX syntax is no longer parsed in `.js` files**; rename them to `.jsx` or `.tsx`.
+- **Full file imports (0.24.0+)**: Route entry points import stage, inspector, and canvas using their full emitted filenames instead of relying on esbuild extensionless path resolution.
+- **Canvas-only routes (0.22.0+)**: Routes that only export a `canvas` (without stage or inspector) now properly register their content module and render custom canvases.
 
 When documenting `route.tsx` lifecycle hooks, prefer upstream docs. If using hooks not covered by the README, confirm against `packages/boot/src/store/types.ts` and `packages/boot/src/components/app/router.tsx`.
 
@@ -29,60 +30,68 @@ Key route configuration and lifecycle hooks to leverage in `route.tsx`:
 
 ## Page modes
 
-Fullscreen and WP-Admin modes can have different boot inputs and generated callbacks. Verify the generated page templates and the actual `build/pages/{page}/` files before advising on:
+Fullscreen and WP-Admin modes have different boot inputs and generated callbacks. Verify the generated page templates and the actual `build/pages/{page}/` files before advising on:
 
-- menu slugs
+- menu slugs and capabilities
 - callback names
 - init modules
-- menu item registration
 - boot dependency filters
 - sidebar behavior
 
-Do not describe fullscreen sidebar customization as a WP-Admin-mode capability unless the current generated WP-Admin template passes the needed boot data.
-
-Additionally, as of version 0.14.0+, the generated `build/pages.php` loader uses `file_exists()` checks to guard `require_once` statements. This prevents fatal errors during concurrent/hot deployments when files may briefly be missing on disk during high-traffic writes.
-
-For single-page admin configurations (version 0.15.0+), the generated templates defer the dynamic `import( "@wordpress/boot" )` call until the `DOMContentLoaded` event fires. This ensures the boot script evaluates only after classic (non-module) script dependencies are fully loaded.
+Key page updates (v0.21.0 - v0.24.0):
+- **Authentication & Capability enforcement (0.23.0+)**: Full-page standalone pages render via `admin_init` interception. The generated `{{PREFIX}}_{{PAGE_SLUG_UNDERSCORE}}_intercept_render()` function strictly enforces `if ( ! is_user_logged_in() ) { auth_redirect(); }` and `current_user_can( $capability )`. Without this, unauthenticated requests reaching `admin_init` (e.g. `admin-post.php`) would render the page.
+- **Configurable `capability` setting (0.23.0+)**: Under `wpPlugin.pages`, page objects accept a `"capability"` property (defaults to `"manage_options"`):
+  ```json
+  {
+    "id": "my-admin-page",
+    "capability": "edit_theme_options",
+    "experimental": false
+  }
+  ```
+- **Fallback to Core Boot module (0.22.0+)**: If a plugin does not build its own boot module under `modules/boot/`, generated templates automatically fall back to WordPress Core's bundled `@wordpress/boot` module (`ABSPATH . WPINC . '/js/dist/script-modules/boot/index.min.asset.php'`).
+- **No-JS fallback notice (0.21.0+)**: Generated templates include a `.no-js` body class and render a `<noscript>` / `.hide-if-js` error notice explaining that JavaScript is required. Critical styles are scoped to `body.js` so the notice remains styled if scripts fail.
+- **Single-page DOMContentLoaded deferral (0.15.0+)**: Single-page admin templates defer dynamic `import("@wordpress/boot")` until `DOMContentLoaded` so boot evaluates after classic scripts are loaded.
 
 ## Generated PHP helpers
 
-Generated helper names and signatures have changed before. Never invent them from memory.
+Generated helper names and signatures change across versions. Never invent them from memory.
 
 After running the build, inspect:
 
 - `build/build.php`
 - `build/routes.php`
 - `build/pages.php`
-- `build/pages/{page}/page.php`
+- `build/pages/{page}/page.php` (contains standalone interceptor and render callback)
 - `build/pages/{page}/page-wp-admin.php`
-- `build/widgets.php` when widgets are used (note the presence of `{{PREFIX}}_get_registered_widget_modules()` which memoizes discovered widgets and resolves dynamic handles).
+- `build/widgets.php` and `build/widgets/registry.php`
 
-Note: The generated loader files and registration templates (e.g. `module-registration.php.template`) now wrap `require_once` inside `file_exists()` conditionals to avoid fatal errors during concurrent deployment races.
+Note: Generated loader files wrap `require_once` in `file_exists()` checks to prevent fatal errors during concurrent deployment file writes.
 
 ## Widgets
 
-Widget behavior has moved quickly. 
+Widgets follow a dual-entry architecture splitting discovery metadata from runtime code:
+1. `widget.json`: Static discovery metadata, category, presentation, and translatable strings.
+2. `widget.ts`: Runtime contract, DataViews attribute schema with `relevance`, icon, and example.
+3. `render.tsx`: UI component receiving typed attributes. Supports `.tsx`, `.ts`, `.jsx`, `.js`, `.mjs`.
 
-Key 0.15.0+ updates to verify:
-- **`widget.json` `presentation` property**: Supports `'framed' | 'content-bleed' | 'full-bleed'` to describe the rendering intent of a widget. `'content-bleed'` keeps the widget header visible while the content area renders edge-to-edge. Check `widget.json` metadata for this key, which will generate `'presentation' => ...` mappings inside `build/widgets/registry.php`.
-- **Widget header icons**: The `icon` property exported in `widget.ts` is restricted to SVG components or React components (e.g. from `@wordpress/icons`). Dashicons strings (such as `'wordpress'`) are **no longer supported**.
-- **Local tsconfig config**: Widgets directories support local TypeScript compile checking (`@wordpress/*`, JSX, and CSS modules resolution).
-- **Local `package.json`**: Each widget directory under `widgets/` supports an optional local `package.json` as an npm dependencies manifest.
-- **Dynamic boot dependencies**: Generated page templates (`page.php` and `page-wp-admin.php`) now automatically resolve registered widgets and inject their handles (`widget_module` and `render_module`) as dynamic `$boot_dependencies` to ensure assets load properly on active pages.
-
-As of version 0.14.0, generated CSS Module styles are registered to `@wordpress/style-runtime`. This is critical for ensuring that styles are correctly injected into registered documents, such as **editor iframes**. If you encounter missing styles when a component renders inside an iframe, verify that the project is using a recent version of `@wordpress/build` and that the styles are processed as CSS Modules.
-
-Key styling updates since 0.11.0:
-- **`data-wp-hash` calculation (0.11.0+)**: The build system derives the `data-wp-hash` attribute from the *transformed* CSS output instead of the raw source CSS. This prevents style hydration mismatches when multiple asset-processing pipelines modify the same files.
-- **`#wpwrap` background removal (0.16.0+)**: The incorrect `#wpwrap` background color styling was removed from the generated wp-admin critical CSS. It now relies on the browser-native `body` background styling to prevent a temporary black flash during initial page load/hydration.
+Key widget capabilities (v0.19.0 - v0.24.0):
+- **Declarative `attributes` in `widget.json` (0.24.0+)**: Carried directly into `build/widgets/registry.php`.
+- **Translatable metadata in `widget.json` (0.19.0+ - 0.21.0+)**: `title`, `description`, `help` (with `content` and `links`), `keywords`, `category`, and `textdomain` are forwarded to the PHP registry so the host can translate fields server-side without a JS runtime.
+- **Declarative icons and actions (0.20.0+, 0.21.0+)**: Declarative `icon` and `actions` in `widget.json` are passed to `build/widgets/registry.php`. Icons in `widget.ts` must be React/SVG components (e.g. `@wordpress/icons`), not Dashicons strings.
+- **Relevance tiers (0.22.0+)**: Attribute fields support `relevance: 'high' | 'medium' | 'low'` (defaults to `'low'`).
+- **Presentation modes (0.15.0+)**: Supports `'framed' | 'content-bleed' | 'full-bleed'`.
+- **Dynamic boot dependencies**: Page templates resolve registered widgets and inject their handles as dynamic `$boot_dependencies`.
 
 ## Dependency and host assumptions
 
-Do not hard-code compatibility claims from this skill. Check current `package.json` peer dependencies, changelog notes, generated asset files, and the target WordPress/Gutenberg runtime.
+Do not hard-code compatibility claims. Check current `package.json` peer dependencies and changelog notes.
 
 Key runtime/dependency shifts:
-- **Unbundled core packages (0.10.0+)**: Core packages `@wordpress/boot`, `@wordpress/route`, `@wordpress/theme`, and `@wordpress/private-apis` are **no longer bundled** by `@wordpress/build`. They must be provided by the host environment—either **WordPress Core (7.0+)** or an active **Gutenberg plugin**. Plugins relying on these packages for pages or routes will fail to boot on older WordPress versions unless Gutenberg is active.
-- **Namespaced import fallback (0.16.0+)**: When a namespaced import (matching your configured `@packageNamespace/*`) resolves to a package that is not installed in the local node dependencies, `getPackageInfo` returns `null` instead of throwing. This prevents build crashes, allowing esbuild to fall through and try to resolve the import using its standard pathing.
-- **Getter export reversion (0.16.0+)**: In `@wordpress/build` version 0.14.0, esbuild's getter-based exports were replaced with data properties using a footer shallow copy (`Object.assign({}, globalName)`). However, **this optimization was reverted in version 0.16.0** to restore compatibility for Gutenberg 23.0 builds.
-
-At runtime, `@wordpress/boot` now runs on React 19. If writing UI components for page navigation or dashboard views, migrate from the legacy `@wordpress/components` `Tooltip` to the new `@wordpress/ui` compound components (e.g. `<Tooltip.Root>`, `<Tooltip.Trigger>`, `<Tooltip.Popup>`) as the old version is phased out from the boot shell.
+- **No JSX parsing in `.js` files (0.23.0+)**: Breaking change. `@wordpress/build` no longer parses JSX in `.js` files. All JSX syntax must be in `.jsx` or `.tsx` files.
+- **Unbundled core packages (0.10.0+)**: `@wordpress/boot`, `@wordpress/route`, `@wordpress/theme`, and `@wordpress/private-apis` are not bundled. They must be provided by WordPress Core (7.0+) or Gutenberg plugin.
+- **`@wordpress/theme` peer range (0.19.0+, 0.23.0+)**: Peer dependency range is widened to `>=0.8.0 <3.0.0` (supporting 1.x and 2.x).
+- **`@wordpress/ui` adoption in Boot**:
+  - Modern `@wordpress/boot` admin pages and dashboards migrate away from legacy `@wordpress/components` toward `@wordpress/ui` compound components (e.g. `<Tooltip.Root>`, `<Dialog.Root>`, `<EmptyState>`).
+  - **Critical architectural distinction**: Unlike `@wordpress/components`, `@wordpress/ui` is **NOT exposed on `window.wp.ui`**. It is an npm package adhering to semver.
+  - When used outside standard editor screens, `@wordpress/ui` requires `@wordpress/theme/design-tokens.css` for design token custom properties, and `.root { isolation: isolate; }` on the layout root for portaled popovers.
+- **CSS Modules in iframe (0.14.0+)**: CSS Modules register with `@wordpress/style-runtime` to ensure injection into editor iframes.

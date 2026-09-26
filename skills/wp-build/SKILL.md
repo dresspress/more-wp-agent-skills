@@ -36,6 +36,7 @@ Start with:
 - `packages/wp-build/templates/*.php.template`
 - `packages/boot/src/` when page or route runtime behavior matters
 - `packages/route/src/` when router behavior matters
+- `packages/ui/` and `packages/theme/` when admin page UI components or Design System tokens matter
 
 If network access is unavailable, say that upstream could not be verified and treat all experimental behavior as uncertain.
 
